@@ -1,0 +1,1 @@
+g++ main.cpp object.cpp room.cpp pugixml-1.13/src/pugixml.cpp -o play -Ipugixml-1.13/src/ -lSDL2
