@@ -4,18 +4,25 @@
 #include <list>
 #include "pugixml.hpp"
 #include <string>
+#include "builder.h"
 
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;
 
+    typedef struct 
+    {
+      std::string roomPath;
+      int roomID;
+    } roomHolder_t;
+
 int nextRoomID = 0;
+int currentRoomID = 0;
+    //TODO: this will cause problems eventually
+    roomHolder_t roomHolderArray[10];
+    
 
-void setRoom(int roomID);
-void getItem(int item);
-void startDialogue(int dialogue);
-void goToRoom(int roomID);
-void changeCursor(int cursor);
-
+SDL_Renderer* renderer;
+Room* currentRoom;
 
 
 int main(int argc, char* argv[]) {
@@ -34,7 +41,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Create a renderer
-  SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   if (!renderer) {
     std::cout << "Failed to create renderer: " << SDL_GetError() << std::endl;
     SDL_DestroyWindow(window);
@@ -59,102 +66,48 @@ int main(int argc, char* argv[]) {
   }
 
 
-  pugi::xml_document doc;
-  if(!doc.load_file("rooms/rooms.xml"))
-    return -1;
+  // pugi::xml_document doc;
+  // if(!doc.load_file("rooms/rooms.xml"))
+  //   return -1;
+
+
+  // Builder builder("builder.xml");
+
+    // Builder builder("builder.xml");
+
+    pugi::xml_document doc;
+    if(!doc.load_file("builder.xml"))
+        return -1;
+
+    
+
+    int numRooms=0;
+    //Get a list of all the rooms
+    for (pugi::xml_node room = doc.child("rooms").child("room"); room; room = room.next_sibling("room"))
+    {
+      // roomHolderArray[numRooms] = malloc(sizeof(roomHolder_t));
+      roomHolderArray[numRooms].roomID = room.attribute("roomID").as_int();
+      roomHolderArray[numRooms].roomPath = room.attribute("roomPath").as_string();
+      numRooms++;
+    }
+
+
+  //build room
+  // Room testRoom(renderer, roomHolderArray[0].roomID, roomHolderArray[0].roomPath);
+  // testRoom.load();
+
+  // std::list <Room> rooms;
+  currentRoom = new Room(renderer, roomHolderArray[0].roomID, roomHolderArray[0].roomPath);
+  currentRoom->load();
+  // Room* nextRoom = currentRoom;
+
+  
 
 
 
 
-  std::list <Room> rooms;
-  Room* currentRoom;
-  Room* nextRoom = currentRoom;
 
-  // rooms
-  for (pugi::xml_node room = doc.child("roomList").child("room"); room; room = room.next_sibling("room"))
-  {
-
-      int roomID = room.attribute("id").as_int();
-      std::cout << "room " << roomID;
-      std::string roomImagePath = room.attribute("imagepath").as_string();
-      //create room 0
-      currentRoom = new Room(renderer, roomID, roomImagePath);
-
-      // objects
-      for(pugi::xml_node object = room.child("object"); object; object = object.next_sibling("object"))
-      {
-
-        int objectID =  object.attribute("id").as_int();
-        int x =  object.attribute("x").as_int();
-        int y =  object.attribute("y").as_int();
-        int w =  object.attribute("width").as_int();
-        int h =  object.attribute("height").as_int();
-        std::string imgPath =  object.attribute("imagepath").as_string();
-        int cursorID = object.attribute("cursorID").as_int();
-        void (*_onClickCallback)(int value);
-        void (*_onHoverCallback)(int value);
-        // void (*_onClickCallback)(int value);
-        int value;
-        std::string onClickAction = object.attribute("onClick").as_string();
-        std::string onHoverAction = object.attribute("onHover").as_string();
-
-        std::cout << std::endl;
-        std::cout << "object: " << objectID;
-        std::cout << ", x: " << x;
-        std::cout << ", y: " << y;
-        std::cout << ", width: " << w;
-        std::cout << ", height: " << h;
-        std::cout << ", imagePath: " << imgPath;
-        std::cout << ", onClick: " << onClickAction;
-        std::cout << ", onHover: " << onHoverAction;
-        std::cout << ", cursodIR: " << cursorID;
-
-
-
-        if(onClickAction.compare("getItem") == 0) // getItem
-        {
-          _onClickCallback = getItem;
-          value = object.attribute("item").as_int();
-          std::cout << ", item: " << value;
-        }
-        else if(onClickAction.compare("startDialogue") == 0) // startDialogue
-        {
-          _onClickCallback = startDialogue;
-          std::cout << ", dialogue: " << object.attribute("dialogue").as_string();
-        }
-        else if(onClickAction.compare("goToRoom") == 0) // goToRoom
-        {
-          _onClickCallback = goToRoom;
-          std::cout << ", nextRoomID: " << object.attribute("nextRoomID").as_string();
-        }
-
-        
-        if(onHoverAction.compare("changeCursor") == 0) // changeCursor
-        {
-          std::cout << ", cursor: " << object.attribute("cursor").as_int();
-          _onHoverCallback = changeCursor;
-        }
-
-
-        std::cout << ", onUseItem: " << object.attribute("onUseItem").value();
-        
-
-       
-        Object mobject(x, y, w, h, imgPath, renderer, objectID, _onClickCallback, value, _onHoverCallback, cursorID);
-        currentRoom->addObject(mobject);
-        rooms.push_front(*currentRoom);
-
-      }
-
-  }
-  // end::data[]
-
-  std::cout << std::endl;
-
-
-
-
-  currentRoom = &rooms.front();
+  // currentRoom = &rooms.front();
   
   if (currentRoom->load()) {
     std::cout << "Failed to load room: " << SDL_GetError() << std::endl;
@@ -167,8 +120,21 @@ int main(int argc, char* argv[]) {
   // Main loop
   bool running = true;
   while (running) {
+
+
+    if(currentRoomID != nextRoomID)
+    {
+      //destroy old room
+      currentRoom->~Room();
+
+      //load new room
+      currentRoom = new Room(renderer, roomHolderArray[nextRoomID].roomID, roomHolderArray[nextRoomID].roomPath);
+      currentRoom->load();
+      currentRoomID = nextRoomID;
+    }
+
     // currentRoom = nextRoom;
-    currentRoom = &rooms.front();
+    // currentRoom = &rooms.front();
     SDL_Event event;
     int x, y;
     SDL_GetMouseState(&x, &y);
@@ -244,9 +210,11 @@ int main(int argc, char* argv[]) {
   void goToRoom(int roomID)
   {
     std::cout << "go to roomID: " << roomID << std::endl;
+    nextRoomID = roomID;
   }
 
   void changeCursor(int cursor)
   {
     std::cout << "we are performing a hover action here" << std::endl;
+
   }

@@ -6,7 +6,15 @@
 #include <iostream>
 
 
+void setRoom(int roomID);
+void getItem(int item);
+void startDialogue(int dialogue);
+void goToRoom(int roomID);
+void changeCursor(int cursor);
+
 SDL_Surface* resizeSurface(SDL_Surface* surface, int w, int h);
+
+
 
 
 #endif

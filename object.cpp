@@ -58,3 +58,4 @@ int Object::render()
 
     return ret;
 }
+

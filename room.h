@@ -9,7 +9,7 @@ class Room
 {
     
 public:
-    Room(SDL_Renderer* _renderer, int uniqueID, std::string imagePath);
+    Room(SDL_Renderer* _renderer, int roomID, std::string roomPath);
 
     std::list <Object> objects;
 
@@ -18,10 +18,13 @@ public:
     void addObject(Object _object);
 
     SDL_Renderer* renderer;
-    int uniqueID;
+    std::string roomPath;
+    int roomID;
     std::string imagePath;
     SDL_Surface* bkImageSurface;
     SDL_Texture * bkImageTexture;
+
+    ~Room();
 
 };
 
