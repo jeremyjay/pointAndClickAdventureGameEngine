@@ -1,5 +1,3 @@
-#include <SDL2/SDL.h>
-#include <iostream>
 
 #include "object.h"
 #include "stdio.h"
@@ -7,7 +5,7 @@
 
 Object::Object(int _x, int _y, int _width, int _height, std::string _img_source, 
                 SDL_Renderer* _renderer, int _uniqueID, void (*_onClickCallback)(int value), int _value,
-                void (*_onHoverCallback)(int value))
+                void (*_onHoverCallback)(int value), int _cursorID)
 {
     x = _x;
     y = _y;
@@ -19,6 +17,7 @@ Object::Object(int _x, int _y, int _width, int _height, std::string _img_source,
     onClickCallback = _onClickCallback;
     value = _value;
     onHoverCallback = _onHoverCallback;
+    cursorID = _cursorID;
 }
 
 void Object::onClick()
@@ -54,8 +53,8 @@ int Object::render()
     int ret = 0;
 
     SDL_Rect objectRect = { x, y, width, height };
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &objectRect);
+    // SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_TRANSPARENT);
+    // SDL_RenderFillRect(renderer, &objectRect);
 
     return ret;
 }

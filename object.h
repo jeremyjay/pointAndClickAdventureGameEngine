@@ -2,13 +2,14 @@
 #define OBJECT_H_
 
 #include <string>
+#include "common.h"
 
 class Object
 {
 public:
     Object(int _x, int _y, int _width, int _height, std::string _img_source, 
                 SDL_Renderer* _renderer, int _uniqueID, void (*_onClickCallback)(int value), int _value,
-                void (*_onHoverCallback)(int value));
+                void (*_onHoverCallback)(int value), int _cursorID);
 
 
     void onClick();
@@ -25,6 +26,7 @@ public:
     void (*onClickCallback)(int value);
     int value;
 
+    int cursorID;
     void (*onHoverCallback)(int value);
     
 

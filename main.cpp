@@ -1,5 +1,4 @@
-#include <SDL2/SDL.h>
-#include <iostream>
+#include "cursor.h"
 #include "room.h"
 #include "object.h"
 #include <list>
@@ -14,7 +13,10 @@ int nextRoomID = 0;
 void setRoom(int roomID);
 void getItem(int item);
 void startDialogue(int dialogue);
+void goToRoom(int roomID);
 void changeCursor(int cursor);
+
+
 
 int main(int argc, char* argv[]) {
   // Initialize SDL
@@ -40,52 +42,21 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  // Load the magnifying glass image
-  SDL_Surface* cursorSurface = SDL_LoadBMP("assets/sprites/magnifying_glass.bmp");
-  if (!cursorSurface) {
+
+  Cursor mCursor(renderer, 64, 64, 
+                "assets/sprites/magnifying_glass.png", 
+                "assets/sprites/magnifying_glass_gold.png", 
+                "assets/sprites/redArrowLeft.png", 
+                "assets/sprites/redArrowRight.png");
+
+
+  if (mCursor.load()) {
     std::cout << "Failed to load cursor image: " << SDL_GetError() << std::endl;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 1;
   }
-
-
-  // Load the magnifying glass image
-  SDL_Surface* cursor2Surface = SDL_LoadBMP("assets/sprites/magnifying_glass_gold.bmp");
-  if (!cursor2Surface) {
-    std::cout << "Failed to load cursor image: " << SDL_GetError() << std::endl;
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 1;
-  }
-
-  // set surface size
-
-
-  // Create a cursor texture from the surface
-  SDL_Cursor *cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
-  if (!cursor) {
-    std::cout << "Failed to create cursor texture: " << SDL_GetError() << std::endl;
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 1;
-  }
-
-  // Create a cursor texture from the surface
-  SDL_Cursor *cursor2 = SDL_CreateColorCursor(cursor2Surface, 0, 0);
-  if (!cursor2) {
-    std::cout << "Failed to create cursor texture: " << SDL_GetError() << std::endl;
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 1;
-  }
-
-  SDL_SetCursor(cursor);
-
 
 
   pugi::xml_document doc;
@@ -105,8 +76,9 @@ int main(int argc, char* argv[]) {
 
       int roomID = room.attribute("id").as_int();
       std::cout << "room " << roomID;
+      std::string roomImagePath = room.attribute("imagepath").as_string();
       //create room 0
-      currentRoom = new Room(renderer, roomID);
+      currentRoom = new Room(renderer, roomID, roomImagePath);
 
       // objects
       for(pugi::xml_node object = room.child("object"); object; object = object.next_sibling("object"))
@@ -118,6 +90,7 @@ int main(int argc, char* argv[]) {
         int w =  object.attribute("width").as_int();
         int h =  object.attribute("height").as_int();
         std::string imgPath =  object.attribute("imagepath").as_string();
+        int cursorID = object.attribute("cursorID").as_int();
         void (*_onClickCallback)(int value);
         void (*_onHoverCallback)(int value);
         // void (*_onClickCallback)(int value);
@@ -133,7 +106,10 @@ int main(int argc, char* argv[]) {
         std::cout << ", height: " << h;
         std::cout << ", imagePath: " << imgPath;
         std::cout << ", onClick: " << onClickAction;
-        std::cout << ", onClick: " << onHoverAction;
+        std::cout << ", onHover: " << onHoverAction;
+        std::cout << ", cursodIR: " << cursorID;
+
+
 
         if(onClickAction.compare("getItem") == 0) // getItem
         {
@@ -146,7 +122,12 @@ int main(int argc, char* argv[]) {
           _onClickCallback = startDialogue;
           std::cout << ", dialogue: " << object.attribute("dialogue").as_string();
         }
-        
+        else if(onClickAction.compare("goToRoom") == 0) // goToRoom
+        {
+          _onClickCallback = goToRoom;
+          std::cout << ", nextRoomID: " << object.attribute("nextRoomID").as_string();
+        }
+
         
         if(onHoverAction.compare("changeCursor") == 0) // changeCursor
         {
@@ -159,7 +140,7 @@ int main(int argc, char* argv[]) {
         
 
        
-        Object mobject(x, y, w, h, imgPath, renderer, objectID, _onClickCallback, value, _onHoverCallback);
+        Object mobject(x, y, w, h, imgPath, renderer, objectID, _onClickCallback, value, _onHoverCallback, cursorID);
         currentRoom->addObject(mobject);
         rooms.push_front(*currentRoom);
 
@@ -173,29 +154,15 @@ int main(int argc, char* argv[]) {
 
 
 
-
-
-
-  // //create objects
-  // Object secret1(100, 100, 100, 100, "does not do anything at the moment", renderer, 0, getItem, 1);
-  // Object secret2(250, 250, 100, 100, "does not do anything at the moment", renderer, 1, setRoom, 1);
-  // room->addObject(secret1);
-  // room->addObject(secret2);
-
-
-
-  // //create room 1
-  // Room room1(renderer, 1);
-  // //create objects
-  // Object room1secret1(0, 100, 100, 100, "does not do anything at the moment", renderer, 2, getItem, 0);
-  // Object room1secret2(300, 100, 100, 100, "does not do anything at the moment", renderer, 3, setRoom, 0);
-  // room1.addObject(room1secret1);
-  // room1.addObject(room1secret2);
-
-
-  // Room currentRoom = room;
-  // Room nextRoom = currentRoom;
-
+  currentRoom = &rooms.front();
+  
+  if (currentRoom->load()) {
+    std::cout << "Failed to load room: " << SDL_GetError() << std::endl;
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    return 1;
+  }
 
   // Main loop
   bool running = true;
@@ -225,12 +192,12 @@ int main(int argc, char* argv[]) {
         {
           if(i.isCursorInBounds(x,y)) {
               i.onHover();
-              SDL_SetCursor(cursor2);
+              mCursor.setCursor(i.cursorID);
               break;
           }
           else
           {
-              SDL_SetCursor(cursor);
+              mCursor.setCursor(0); /* reset to default cursor */
           }
           
         }
@@ -240,19 +207,15 @@ int main(int argc, char* argv[]) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    // Draw objects
-    for(auto i : currentRoom->objects)
-    {
-      i.render();
-    }
+    // Draw room
+    currentRoom->render();
 
     // Update the screen
     SDL_RenderPresent(renderer);
   }
 
   // Clean up
-  SDL_FreeCursor(cursor);
-  SDL_FreeSurface(cursorSurface);
+  mCursor.cleanUp();
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
@@ -276,6 +239,11 @@ int main(int argc, char* argv[]) {
   void startDialogue(int dialogue)
   {
     std::cout << "starting Dialogue: " << dialogue << std::endl;
+  }
+
+  void goToRoom(int roomID)
+  {
+    std::cout << "go to roomID: " << roomID << std::endl;
   }
 
   void changeCursor(int cursor)
