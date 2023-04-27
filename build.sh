@@ -1,1 +1,1 @@
-g++ main.cpp common.cpp cursor.cpp object.cpp room.cpp pugixml-1.13/src/pugixml.cpp -o play -Ipugixml-1.13/src/ -lSDL2 -lSDL2_IMAGE -ggdb -O0
+g++ engineSrc/main.cpp engineSrc/common.cpp engineSrc/cursor.cpp engineSrc/object.cpp engineSrc/room.cpp engineSrc/pugixml-1.13/src/pugixml.cpp -o play -IengineSrc/pugixml-1.13/src/ -lSDL2 -lSDL2_IMAGE -ggdb -O0
