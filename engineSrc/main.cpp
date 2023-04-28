@@ -103,10 +103,6 @@ int main(int argc, char* argv[]) {
 
   
 
-
-
-
-
   // currentRoom = &rooms.front();
   
   if (currentRoom->load()) {
