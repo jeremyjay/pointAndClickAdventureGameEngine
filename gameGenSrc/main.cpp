@@ -7,6 +7,27 @@
 #include <wx/filename.h>
 
 
+class MainFrame;
+class DrawSquarePanel;
+
+class MainFrame : public wxFrame
+{
+public:
+    MainFrame();
+    void UpdateSquaresList();
+
+private:
+    void OnDrawSquaresToggle(wxCommandEvent &event);
+    void OnSaveButtonClick(wxCommandEvent &event);
+    void OnLoadButtonClick(wxCommandEvent &event);
+    void OnEditToggle(wxCommandEvent &event);
+
+    DrawSquarePanel *m_drawSquarePanel;
+    wxToggleButton *drawSquaresButton;
+    wxToggleButton *editToggleButton;
+    wxChoice *m_squaresList;
+};
+
 enum {
     ID_DRAW_SQUARE_TOGGLE = 1,
     ID_SAVE_BTN,
@@ -43,7 +64,7 @@ private:
 
 class DrawSquarePanel : public wxPanel {
 public:
-    DrawSquarePanel(wxWindow* parent);
+    DrawSquarePanel(wxWindow* parent, MainFrame * mainFrame);
 
     void EnableDrawSquares(bool enable);
     void SaveSquaresToXML(const wxString &path);
@@ -53,6 +74,7 @@ public:
     void EnableEditSquares(bool enable);
     void DeleteSelectedSquare();
     void AssignImageToSelectedSquare(const wxString &imagePath);
+    std::vector<wxRect> GetSquares();
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -77,6 +99,8 @@ private:
 
     wxRect *m_selectedSquare;
 
+    MainFrame *m_mainFrame; /* may be a bad idea?? */
+
 };
 
 void DrawSquarePanel::EnableDrawSquares(bool enable) 
@@ -95,6 +119,11 @@ void DrawSquarePanel::AssignImageToSelectedSquare(const wxString &imagePath)
         // Add code here to assign an image to the selected square
         // You may need to modify the data structure used to store squares to store image information as well
     }
+}
+
+std::vector<wxRect> DrawSquarePanel::GetSquares()
+{
+    return m_squares;
 }
 
 void DrawSquarePanel::DeleteSelectedSquare()
@@ -130,9 +159,10 @@ void DrawSquarePanel::LoadBackgroundImage(const wxString &path)
 }
 
 
-DrawSquarePanel::DrawSquarePanel(wxWindow* parent)
+DrawSquarePanel::DrawSquarePanel(wxWindow* parent, MainFrame * mainFrame)
     : wxPanel(parent), m_drawSquaresEnabled(false), m_editSquaresEnabled(false),
-      m_drawingSquare(false), m_draggingSquare(false), m_selectedSquare(nullptr) {
+      m_drawingSquare(false), m_draggingSquare(false), m_selectedSquare(nullptr),
+      m_mainFrame(mainFrame) {
     
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     SetDoubleBuffered(true);
@@ -181,6 +211,8 @@ void DrawSquarePanel::DrawSquare(wxDC &dc, const wxRect &rect)
     dc.DrawRectangle(rect);
 }
 
+
+
 wxRect *DrawSquarePanel::GetSquareAtPoint(const wxPoint &point)
 {
     for (auto &rect : m_squares) {
@@ -212,6 +244,10 @@ void DrawSquarePanel::OnLeftUp(wxMouseEvent& event) {
         m_squares.push_back(rect);
         m_drawingSquare = false;
         Refresh();
+        if (m_mainFrame)
+        {
+            m_mainFrame->UpdateSquaresList();
+        }
     } else if (m_draggingSquare) {
         m_draggingSquare = false;
     }
@@ -291,6 +327,10 @@ void DrawSquarePanel::LoadSquaresFromXML(const wxString &path) {
             int height = wxAtoi(squareNode->GetAttribute("height", "0"));
 
             m_squares.push_back(wxRect(x, y, width, height));
+            if (m_mainFrame)
+            {
+                m_mainFrame->UpdateSquaresList();
+            }
         }
         squareNode = squareNode->GetNext();
     }
@@ -299,29 +339,14 @@ void DrawSquarePanel::LoadSquaresFromXML(const wxString &path) {
 }
 
 
-class MainFrame : public wxFrame
-{
-public:
-    MainFrame();
 
-private:
-    void OnDrawSquaresToggle(wxCommandEvent &event);
-    void OnSaveButtonClick(wxCommandEvent &event);
-    void OnLoadButtonClick(wxCommandEvent &event);
-    void OnEditToggle(wxCommandEvent &event);
-
-
-    DrawSquarePanel *m_drawSquarePanel;
-    wxToggleButton *drawSquaresButton;
-    wxToggleButton *editToggleButton;
-};
 
 MainFrame::MainFrame()
     : wxFrame(NULL, wxID_ANY, "Draw Squares", wxDefaultPosition, wxSize(800, 600))
 {
     wxSplitterWindow *splitter = new wxSplitterWindow(this, wxID_ANY);
     wxPanel *toolsPanel = new wxPanel(splitter, wxID_ANY);
-    m_drawSquarePanel = new DrawSquarePanel(splitter);
+    m_drawSquarePanel = new DrawSquarePanel(splitter, this);
 
     splitter->SplitVertically(toolsPanel, m_drawSquarePanel, this->GetSize().GetWidth() / 3);
 
@@ -334,6 +359,8 @@ MainFrame::MainFrame()
     toolsSizer->Add(loadButton, 0, wxALL, 10);
     editToggleButton = new wxToggleButton(toolsPanel, ID_EDIT_TOGGLE, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
     toolsSizer->Add(editToggleButton, 0, wxALL, 5);
+    m_squaresList = new wxChoice(toolsPanel, wxID_ANY);
+    toolsSizer->Add(m_squaresList, 0, wxALL, 5);
 
     
     toolsPanel->SetSizer(toolsSizer);
@@ -344,6 +371,19 @@ MainFrame::MainFrame()
     Bind(wxEVT_TOGGLEBUTTON, &MainFrame::OnEditToggle, this, editToggleButton->GetId());
 
 }
+
+void MainFrame::UpdateSquaresList()
+{
+    m_squaresList->Clear();
+
+    int index = 0;
+    for (const auto &square : m_drawSquarePanel->GetSquares())
+    {
+        m_squaresList->Append(wxString::Format("Square %d", index));
+        index++;
+    }
+}
+
 
 void MainFrame::OnDrawSquaresToggle(wxCommandEvent &event)
 {
