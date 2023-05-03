@@ -1,5 +1,5 @@
 #include "common.h"
-#include "drawSquaresPanel.h"
+#include "drawObjectsPanel.h"
 #include "toolsPanel.h"
 #include <functional>
 
@@ -9,75 +9,75 @@ class MainFrame : public wxFrame
 {
 public:
     MainFrame();
-    void UpdateSquaresList();
+    void UpdateObjectsList();
 
 private:
-    void OnDrawSquaresToggle(wxCommandEvent &event);
+    void OnDrawObjectsToggle(wxCommandEvent &event);
     void OnSaveButtonClick(wxCommandEvent &event);
     void OnLoadButtonClick(wxCommandEvent &event);
     void OnEditToggle(wxCommandEvent &event);
 
-    DrawSquarePanel *m_drawSquarePanel;
+    DrawObjectPanel *m_drawObjectPanel;
     DrawToolsPanel *m_drawToolsPanel;
 
-    // wxToggleButton *drawSquaresButton;
+    // wxToggleButton *drawObjectsButton;
     // wxToggleButton *editToggleButton;
-    // wxChoice *m_squaresList;
+    // wxChoice *m_objectsList;
 };
 
 MainFrame::MainFrame()
-    : wxFrame(NULL, wxID_ANY, "Draw Squares", wxDefaultPosition, wxSize(800, 600))
+    : wxFrame(NULL, wxID_ANY, "Draw Objects", wxDefaultPosition, wxSize(800, 600))
 {
     wxSplitterWindow *splitter = new wxSplitterWindow(this, wxID_ANY);
     // wxPanel *toolsPanel = new wxPanel(splitter, wxID_ANY);
     m_drawToolsPanel = new DrawToolsPanel(splitter, 
-        std::bind(&MainFrame::OnDrawSquaresToggle, this, std::placeholders::_1),
+        std::bind(&MainFrame::OnDrawObjectsToggle, this, std::placeholders::_1),
         std::bind(&MainFrame::OnSaveButtonClick, this, std::placeholders::_1),
         std::bind(&MainFrame::OnLoadButtonClick, this, std::placeholders::_1),
         std::bind(&MainFrame::OnEditToggle, this, std::placeholders::_1)
     );
 
-    m_drawSquarePanel = new DrawSquarePanel(splitter, 
-        std::bind(&MainFrame::UpdateSquaresList, this)
+    m_drawObjectPanel = new DrawObjectPanel(splitter, 
+        std::bind(&MainFrame::UpdateObjectsList, this)
     );
 
 
 
-    splitter->SplitVertically(m_drawToolsPanel, m_drawSquarePanel, this->GetSize().GetWidth() / 3);
+    splitter->SplitVertically(m_drawToolsPanel, m_drawObjectPanel, this->GetSize().GetWidth() / 3);
 
 
 
 }
 
-void MainFrame::UpdateSquaresList()
+void MainFrame::UpdateObjectsList()
 {
-    m_drawToolsPanel->m_squaresList->Clear();
+    m_drawToolsPanel->m_objectsList->Clear();
 
     int index = 0;
-    for (const auto &square : m_drawSquarePanel->GetSquares())
+    for (const auto &object : m_drawObjectPanel->GetObjects())
     {
-        m_drawToolsPanel->m_squaresList->Append(wxString::Format("Square %d", index));
+        m_drawToolsPanel->m_objectsList->Append(wxString::Format("Object %d", index));
         index++;
     }
-    std::cout << "update squares list in main" << std::endl;
+    std::cout << "update objects list in main" << std::endl;
 }
 
 
-void MainFrame::OnDrawSquaresToggle(wxCommandEvent &event)
+void MainFrame::OnDrawObjectsToggle(wxCommandEvent &event)
 {   
-    m_drawSquarePanel->EnableDrawSquares(event.IsChecked());
+    m_drawObjectPanel->EnableDrawObjects(event.IsChecked());
     if (event.IsChecked()) {
         m_drawToolsPanel->editToggleButton->SetValue(false);
-        m_drawSquarePanel->EnableEditSquares(false);
+        m_drawObjectPanel->EnableEditObjects(false);
     }
 }
 
 void MainFrame::OnEditToggle(wxCommandEvent &event)
 {
-    m_drawSquarePanel->EnableEditSquares(event.IsChecked());
+    m_drawObjectPanel->EnableEditObjects(event.IsChecked());
     if (event.IsChecked()) {
-        m_drawToolsPanel->drawSquaresButton->SetValue(false);
-        m_drawSquarePanel->EnableDrawSquares(false);
+        m_drawToolsPanel->drawObjectsButton->SetValue(false);
+        m_drawObjectPanel->EnableDrawObjects(false);
     }
 }
 
@@ -96,7 +96,7 @@ void MainFrame::OnSaveButtonClick(wxCommandEvent &event) {
         return;
     }
 
-    m_drawSquarePanel->SaveSquaresToXML(path);
+    m_drawObjectPanel->SaveObjectsToXML(path);
 }
 
 void MainFrame::OnLoadButtonClick(wxCommandEvent &event) {
@@ -113,7 +113,7 @@ void MainFrame::OnLoadButtonClick(wxCommandEvent &event) {
         return;
     }
 
-    m_drawSquarePanel->LoadSquaresFromXML(path);
+    m_drawObjectPanel->LoadObjectsFromXML(path);
 }
 
 
