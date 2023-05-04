@@ -20,6 +20,7 @@ int interactiveObjectTest()
     InteractiveObject exampleObject(
         1,                           // ID
         "path/to/image.png",         // Image path
+        "path/to/image.png",         // Cursor Image path
         50, 50,                      // x, y coordinates
         100, 100,                    // Width, height
         0,                           // Cursor ID

@@ -14,7 +14,10 @@ enum {
     ID_DRAW_SQUARE_TOGGLE = 1,
     ID_SAVE_BTN,
     ID_LOAD_BTN,
-    ID_EDIT_TOGGLE
+    ID_EDIT_TOGGLE,
+    ID_OBJECTS_LIST,
+    ID_OBJECT_X_TEXT,
+    ID_OBJECT_IMAGE_BUTTON
 };
 
 class MainFrame;

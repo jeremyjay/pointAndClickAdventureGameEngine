@@ -10,12 +10,29 @@ public:
         std::function<void(wxCommandEvent &event)> OnDrawObjectsToggle,
         std::function<void(wxCommandEvent &event)> OnSaveButtonClick,
         std::function<void(wxCommandEvent &event)> OnLoadButtonClick,
-        std::function<void(wxCommandEvent &event)> OnEditToggle
+        std::function<void(wxCommandEvent &event)> OnEditToggle,
+        std::function<void(wxCommandEvent &event)> OnObectsListSelected,
+        std::function<void(wxCommandEvent &event)> OnObjectImageButtonClicked
     );
 
     wxToggleButton *editToggleButton;
     wxToggleButton *drawObjectsButton;
     wxChoice *m_objectsList;
+    wxBitmapButton* m_objectImageButton;
+
+
+
+void ughTest(wxCommandEvent &event);
+void ugthest(wxCommandEvent &event);
+
+    //maybe move to private
+    wxTextCtrl *m_objectXText;
+    wxTextCtrl *m_objectYText;
+    wxTextCtrl *m_objectWidthText;
+    wxTextCtrl *m_objectHeightText;
+    wxChoice *m_objectOnClickChoice;
+    wxChoice *m_objectOnHoverChoice;
+    wxChoice *m_objectOnUseItemChoice;
 
 private:
 
@@ -24,6 +41,8 @@ private:
     std::function<void(wxCommandEvent &event)> OnSaveButtonClick;
     std::function<void(wxCommandEvent &event)> OnLoadButtonClick;
     std::function<void(wxCommandEvent &event)> OnEditToggle;
+    std::function<void(wxCommandEvent &event)> OnObjectsListSelected;
+    std::function<void(wxCommandEvent &event)> OnObjectImageButtonClicked;
 
 };
 

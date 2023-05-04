@@ -72,6 +72,12 @@ DrawObjectPanel::DrawObjectPanel(wxWindow* parent, std::function<void(void)> OnU
     Bind(wxEVT_LEFT_UP, &DrawObjectPanel::OnLeftUp, this);
     Bind(wxEVT_MOTION, &DrawObjectPanel::OnMouseMove, this);
     Bind(wxEVT_SIZE, &DrawObjectPanel::OnSize, this);
+
+    // In DrawSquarePanel constructor:
+    Bind(wxEVT_MOTION, &DrawObjectPanel::OnMouseMotion, this);
+
+
+
 }
 
 void DrawObjectPanel::OnPaint(wxPaintEvent& event) {
@@ -146,13 +152,14 @@ void DrawObjectPanel::OnLeftUp(wxMouseEvent& event) {
 
         InteractiveObject objeto(
             1,                           // ID
-            "path/to/image.png",         // Image path
+            "../assets/sprites/magnifying_glass.png",         // Image path
+            "../assets/sprites/magnifying_glass.png",         // cursor path
             m_startPoint.x, m_startPoint.y,                      // x, y coordinates
             width, height,                    // Width, height
             0,                           // Cursor ID
-            NULL,              // onClick callback
-            NULL,              // onHover callback
-            NULL             // onUseItem callback
+            nullptr,              // onClick callback
+            nullptr,              // onHover callback
+            nullptr             // onUseItem callback
         );
 
         m_objects.push_back(objeto);
@@ -241,7 +248,8 @@ void DrawObjectPanel::LoadObjectsFromXML(const wxString &path) {
             int height = wxAtoi(objectNode->GetAttribute("height", "0"));
 
             // m_objects.push_back(wxRect(x, y, width, height));
-            m_objects.push_back(InteractiveObject(1, "path/to/image.png", x, y, width, height, 0, NULL, NULL, NULL));
+            //TODO: use real image path
+            m_objects.push_back(InteractiveObject(1, "path/to/image.png", "path/to/image/png", x, y, width, height, 0, nullptr, nullptr, nullptr));
             if (OnUpdateObjectsList)
             {
                 OnUpdateObjectsList();
@@ -251,4 +259,46 @@ void DrawObjectPanel::LoadObjectsFromXML(const wxString &path) {
     }
 
     Refresh();
+}
+
+
+
+// In DrawSquarePanel.cpp, add the following definition:
+void DrawObjectPanel::OnMouseMotion(wxMouseEvent &event)
+{
+    wxPoint mousePosition = event.GetPosition();
+    bool isMouseOverObject = false;
+    wxString path;
+
+    for (const auto &object : m_objects)
+    {
+        if (object.Contains(mousePosition))
+        {
+            isMouseOverObject = true;
+            path = object.GetCursorPath();
+            break;
+        }
+    }
+
+    if (isMouseOverObject)
+    {
+
+
+    // In MainFrame constructor:
+        // wxImage cursorImage;
+        // cursorImage.LoadFile("../assets/sprites/magnifying_glass.png");
+
+        wxImage cursorImage(path);
+        cursorImage.Rescale(50, 50, wxIMAGE_QUALITY_HIGH);
+        wxCursor m_customCursor = wxCursor(cursorImage);
+        SetCursor(m_customCursor);
+
+        // SetCursor(m_mainFrame->m_customCursor);
+    }
+    else
+    {
+        SetCursor(wxCursor(wxCURSOR_ARROW));
+    }
+
+    event.Skip();
 }

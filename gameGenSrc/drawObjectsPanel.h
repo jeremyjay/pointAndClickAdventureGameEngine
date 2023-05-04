@@ -20,6 +20,7 @@ public:
     std::vector<InteractiveObject> GetObjects();
     // std::vector<wxRect> GetObjects();
 
+    std::vector<InteractiveObject> m_objects;
 
 
 private:
@@ -33,7 +34,9 @@ private:
     void DrawObject(wxDC &dc, const wxRect &rect);
     wxRect *GetObjectAtPoint(const wxPoint &point);
 
-    std::vector<InteractiveObject> m_objects;
+    void OnMouseMotion(wxMouseEvent &event);
+
+
 
     wxBitmap m_backgroundBitmap;
     
