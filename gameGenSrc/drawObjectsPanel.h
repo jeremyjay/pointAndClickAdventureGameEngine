@@ -6,7 +6,7 @@
 
 class DrawObjectPanel : public wxPanel {
 public:
-    DrawObjectPanel(wxWindow* parent, std::function<void()> OnUpdateObjectsList);
+    DrawObjectPanel(wxWindow* parent, std::function<void()> OnUpdateObjectsList, std::function<void(int)> OnObjectClicked);
 
     void EnableDrawObjects(bool enable);
     void SaveObjectsToXML(const wxString &path);
@@ -50,6 +50,7 @@ private:
     wxRect *m_selectedObject;
 
     std::function<void()> OnUpdateObjectsList;
+    std::function<void(int)> OnObjectClicked;
 
 };
 

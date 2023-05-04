@@ -18,6 +18,8 @@ private:
     void OnEditToggle(wxCommandEvent &event);
     void OnObjectsListSelected(wxCommandEvent &event);
     void OnObjectImageButtonClicked(wxCommandEvent& event);
+    void setSelectedObject(int index);
+
 
     DrawObjectPanel *m_drawObjectPanel;
     DrawToolsPanel *m_drawToolsPanel;
@@ -41,9 +43,9 @@ MainFrame::MainFrame()
     );
 
     m_drawObjectPanel = new DrawObjectPanel(splitter, 
-        std::bind(&MainFrame::UpdateObjectsList, this)
+        std::bind(&MainFrame::UpdateObjectsList, this),
+        std::bind(&MainFrame::setSelectedObject, this, std::placeholders::_1)
     );
-
 
 
     splitter->SplitVertically(m_drawToolsPanel, m_drawObjectPanel, this->GetSize().GetWidth() / 3);
@@ -113,47 +115,14 @@ void MainFrame::UpdateObjectsList()
     // int endIndex = m_drawToolsPanel->m_objectsList->GetSelEnd();
     int selectedIndex = m_drawToolsPanel->m_objectsList->GetCount() - 1;
 
-    if (selectedIndex >= 0 && selectedIndex < m_drawObjectPanel->m_objects.size()) {
-        m_drawToolsPanel->m_objectsList->SetSelection(selectedIndex);
-        InteractiveObject &selectedObject = m_drawObjectPanel->m_objects[selectedIndex];
-        m_drawToolsPanel->m_objectXText->SetValue(wxString::Format("%d", selectedObject.x));
-        m_drawToolsPanel->m_objectYText->SetValue(wxString::Format("%d", selectedObject.y));
-        m_drawToolsPanel->m_objectWidthText->SetValue(wxString::Format("%d", selectedObject.width));
-        m_drawToolsPanel->m_objectHeightText->SetValue(wxString::Format("%d", selectedObject.height));
-  
-        std::cout << "x: " << selectedObject.x << std::endl;
-        std::cout << "y: " << selectedObject.y << std::endl;
-        std::cout << "width: " << selectedObject.width << std::endl;
-        std::cout << "height: " << selectedObject.height << std::endl;
-        std::cout << "cursorPath: " << selectedObject.GetCursorPath() << std::endl;
-
-
-
-        // Load a new image based on the selected index, for example
-        wxString imagePath = selectedObject.GetCursorPath();
-        wxBitmap newImageBitmap(imagePath, wxBITMAP_TYPE_PNG);
-        // Create the wxStaticBitmap control and scale the image to 50x50 pixels
-        wxImage image = newImageBitmap.ConvertToImage();
-        wxImage scaledImage = image.Scale(50, 50);
-        wxBitmap scaledBitmap(scaledImage);
-        // Set the new image to the wxStaticBitmap control
-        m_drawToolsPanel->m_objectImageButton->SetBitmap(scaledBitmap);
-        // Refresh the static bitmap to update the displayed image
-        m_drawToolsPanel->m_objectImageButton->Refresh();
-        // Update wxChoice controls with appropriate values
-        // m_objectOnClickChoice->SetSelection(...);
-        // m_objectOnHoverChoice->SetSelection(...);
-        // m_objectOnUseItemChoice->SetSelection(...);  
-  
-    }
+    setSelectedObject(selectedIndex);
 
 }
 
-void MainFrame::OnObjectsListSelected(wxCommandEvent &event) {
-
-    std::cout << "we're getting here" << std::endl;
-    int selectedIndex = m_drawToolsPanel->m_objectsList->GetSelection();
+void MainFrame::setSelectedObject(int selectedIndex)
+{  
     if (selectedIndex >= 0 && selectedIndex < m_drawObjectPanel->m_objects.size()) {
+        m_drawToolsPanel->m_objectsList->SetSelection(selectedIndex);
         InteractiveObject &selectedObject = m_drawObjectPanel->m_objects[selectedIndex];
         m_drawToolsPanel->m_objectXText->SetValue(wxString::Format("%d", selectedObject.x));
         m_drawToolsPanel->m_objectYText->SetValue(wxString::Format("%d", selectedObject.y));
@@ -184,6 +153,13 @@ void MainFrame::OnObjectsListSelected(wxCommandEvent &event) {
         // m_objectOnHoverChoice->SetSelection(...);
         // m_objectOnUseItemChoice->SetSelection(...);
     }
+}
+
+void MainFrame::OnObjectsListSelected(wxCommandEvent &event) {
+
+    std::cout << "we're getting here" << std::endl;
+    int selectedIndex = m_drawToolsPanel->m_objectsList->GetSelection();
+    setSelectedObject(selectedIndex);
 }
 
 void MainFrame::OnObjectImageButtonClicked(wxCommandEvent& event)

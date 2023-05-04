@@ -59,10 +59,11 @@ void DrawObjectPanel::LoadBackgroundImage(const wxString &path)
 }
 
 
-DrawObjectPanel::DrawObjectPanel(wxWindow* parent, std::function<void(void)> OnUpdateObjectsList)
+DrawObjectPanel::DrawObjectPanel(wxWindow* parent, std::function<void()> OnUpdateObjectsList, std::function<void(int)> OnObjectClicked)
     : wxPanel(parent), m_drawObjectsEnabled(false), m_editObjectsEnabled(false),
       m_drawingObject(false), m_draggingObject(false), m_selectedObject(nullptr),
-      OnUpdateObjectsList(OnUpdateObjectsList) {
+      OnUpdateObjectsList(OnUpdateObjectsList), OnObjectClicked(OnObjectClicked) {
+
     
     SetBackgroundStyle(wxBG_STYLE_PAINT);
     SetDoubleBuffered(true);
@@ -130,17 +131,48 @@ wxRect *DrawObjectPanel::GetObjectAtPoint(const wxPoint &point)
 }
 
 void DrawObjectPanel::OnLeftDown(wxMouseEvent& event) {
-    if (m_drawObjectsEnabled) {
-        m_drawingObject = true;
-        m_startPoint = event.GetPosition();
-        m_endPoint = m_startPoint;
-    } else if (m_editObjectsEnabled) {
-        m_selectedObject = GetObjectAtPoint(event.GetPosition());
-        if (m_selectedObject) {
-            m_draggingObject = true;
-            m_startPoint = event.GetPosition();
+
+
+    wxPoint mousePosition = event.GetPosition();
+    bool isMouseOverObject = false;
+    int index = 0;
+    wxString path;
+
+    // check if clicked on object
+    for (const auto &object : m_objects)
+    {
+        if (object.Contains(mousePosition))
+        {
+            isMouseOverObject = true;
+            break;
+        }
+        index++;
+    }
+
+    if (isMouseOverObject)
+    {
+        if(OnObjectClicked)
+        {
+            std::cout << "calling on object clicked" << std::endl;
+            OnObjectClicked(index);
         }
     }
+    else
+    {
+        if (m_drawObjectsEnabled) {
+            m_drawingObject = true;
+            m_startPoint = event.GetPosition();
+            m_endPoint = m_startPoint;
+        } else if (m_editObjectsEnabled) {
+            m_selectedObject = GetObjectAtPoint(event.GetPosition());
+            if (m_selectedObject) {
+                m_draggingObject = true;
+                m_startPoint = event.GetPosition();
+            }
+        }
+    }
+
+
 }
 
 void DrawObjectPanel::OnLeftUp(wxMouseEvent& event) {
@@ -282,11 +314,6 @@ void DrawObjectPanel::OnMouseMotion(wxMouseEvent &event)
 
     if (isMouseOverObject)
     {
-
-
-    // In MainFrame constructor:
-        // wxImage cursorImage;
-        // cursorImage.LoadFile("../assets/sprites/magnifying_glass.png");
 
         wxImage cursorImage(path);
         cursorImage.Rescale(50, 50, wxIMAGE_QUALITY_HIGH);
