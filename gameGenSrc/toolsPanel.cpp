@@ -38,9 +38,9 @@ DrawToolsPanel::DrawToolsPanel(wxWindow* parent,
 
 
 
-    wxBoxSizer *objectDetailsSizer = new wxBoxSizer(wxVERTICAL);
+    objectDetailsSizer = new wxBoxSizer(wxVERTICAL);
 
-    wxBoxSizer *xyHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+    xyHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
     m_objectXText = new wxTextCtrl(this, ID_OBJECT_X_TEXT, "", wxDefaultPosition, wxSize(40, -1), 0);
     xyHorizontalSizer->Add(new wxStaticText(this, wxID_ANY, "X:"), 0, wxALL, 5);
     xyHorizontalSizer->Add(m_objectXText, 0, wxALL, 5);
@@ -49,7 +49,7 @@ DrawToolsPanel::DrawToolsPanel(wxWindow* parent,
     xyHorizontalSizer->Add(m_objectYText, 0, wxALL, 5);
     objectDetailsSizer->Add(xyHorizontalSizer, 0, wxALL, 5);
 
-    wxBoxSizer *whHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+    whHorizontalSizer = new wxBoxSizer(wxHORIZONTAL);
     m_objectWidthText = new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(40, -1), 0);
     whHorizontalSizer->Add(new wxStaticText(this, wxID_ANY, "Width:"), 0, wxALL, 5);
     whHorizontalSizer->Add(m_objectWidthText, 0, wxALL, 5);
@@ -88,6 +88,8 @@ wxBitmap scaledBitmap(scaledImage);
     objectDetailsSizer->Add(new wxStaticText(this, wxID_ANY, "OnUseItem:"), 0, wxALL, 5);
     objectDetailsSizer->Add(m_objectOnUseItemChoice, 0, wxALL, 5);
 
+    UpdateObjectDetailsVisibility();
+
     toolsSizer->Add(objectDetailsSizer, 0, wxALL, 5);
     
     this->SetSizer(toolsSizer);
@@ -116,4 +118,37 @@ void DrawToolsPanel::ugthest(wxCommandEvent& event)
 {
     OnObjectImageButtonClicked(event);
 }
+
+// void DrawToolsPanel::UpdateObjectDetailsVisibility() {
+//     bool showDetails = m_objectsList->GetSelection() != wxNOT_FOUND;
+    
+//     for (wxSizerItem *child : objectDetailsSizer->GetChildren()) {
+//         wxWindow *window = child->GetWindow();
+//         if (window) {
+//             window->Show(showDetails);
+//         }
+//     }
+    
+//     Layout();
+// }
+
+void DrawToolsPanel::UpdateObjectDetailsVisibility() {
+    bool showDetails = m_objectsList->GetSelection() != wxNOT_FOUND;
+
+    auto updateChildVisibility = [showDetails](wxSizer *sizer) {
+        for (wxSizerItem *child : sizer->GetChildren()) {
+            wxWindow *window = child->GetWindow();
+            if (window) {
+                window->Show(showDetails);
+            }
+        }
+    };
+
+    updateChildVisibility(objectDetailsSizer);
+    updateChildVisibility(xyHorizontalSizer);
+    updateChildVisibility(whHorizontalSizer);
+
+    Layout();
+}
+
 

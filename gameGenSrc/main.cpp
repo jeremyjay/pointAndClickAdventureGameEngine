@@ -122,6 +122,7 @@ void MainFrame::UpdateObjectsList()
 void MainFrame::setSelectedObject(int selectedIndex)
 {  
     if (selectedIndex >= 0 && selectedIndex < m_drawObjectPanel->m_objects.size()) {
+    m_drawToolsPanel->UpdateObjectDetailsVisibility();
         m_drawToolsPanel->m_objectsList->SetSelection(selectedIndex);
         InteractiveObject &selectedObject = m_drawObjectPanel->m_objects[selectedIndex];
         m_drawToolsPanel->m_objectXText->SetValue(wxString::Format("%d", selectedObject.x));

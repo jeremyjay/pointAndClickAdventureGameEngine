@@ -19,11 +19,14 @@ public:
     wxToggleButton *drawObjectsButton;
     wxChoice *m_objectsList;
     wxBitmapButton* m_objectImageButton;
-
+    wxBoxSizer *objectDetailsSizer;
+    wxBoxSizer *xyHorizontalSizer;
+    wxBoxSizer *whHorizontalSizer;
 
 
 void ughTest(wxCommandEvent &event);
 void ugthest(wxCommandEvent &event);
+void UpdateObjectDetailsVisibility();
 
     //maybe move to private
     wxTextCtrl *m_objectXText;
