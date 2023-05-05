@@ -181,19 +181,28 @@ wxBitmap scaledBitmap(scaledImage);
           targetChoice->SetSelection(targetChoice->GetCount() - 1);
 
           //update the selected object
-          // if(m_selectedObject)
-          //   GetActionsForType(targetChoice).push_back(selectedAction.ToStdString());
+          if(m_selectedObject)
+            GetActionsForType(targetChoice).push_back(selectedAction.ToStdString());
         }
     };
 
-    auto onClickDeleteButtonHandler = [](wxCommandEvent& event, wxChoice* targetChoice) {
+    auto onClickDeleteButtonHandler = [this](wxCommandEvent& event, wxChoice* targetChoice) {
         // Add logic for the Delete button here, using targetChoice to determine which wxChoice to update.
-        int selectedIndex = targetChoice->GetSelection();
+        // int selectedIndex = targetChoice->GetSelection();
         
-        if (selectedIndex != wxNOT_FOUND && selectedIndex != 0) {
+        // if (selectedIndex != wxNOT_FOUND && selectedIndex != 0) {
+        //     targetChoice->Delete(selectedIndex);
+        //     targetChoice->SetSelection(0);
+        // }
+// In the OnDeleteButtonClick function
+        int selectedIndex = targetChoice->GetSelection();
+        if (selectedIndex != wxNOT_FOUND) {
+            GetActionsForType(targetChoice).erase(
+                GetActionsForType(targetChoice).begin() + selectedIndex
+            );
             targetChoice->Delete(selectedIndex);
-            targetChoice->SetSelection(0);
         }
+
     };
 
     
@@ -220,15 +229,15 @@ void DrawToolsPanel::ugthest(wxCommandEvent& event)
     OnObjectImageButtonClicked(event);
 }
 
-// std::vector<std::string>& DrawToolsPanel::GetActionsForType(wxChoice* targetChoice) {
-//     if (targetChoice == m_objectOnClickChoice) {
-//         return m_selectedObject->m_onClickActions;
-//     } else if (targetChoice == m_objectOnHoverChoice) {
-//         return m_selectedObject->m_onHoverActions;
-//     } else { // targetChoice == m_objectOnUseItemChoice
-//         return m_selectedObject->m_onUseItemActions;
-//     }
-// }
+std::vector<std::string>& DrawToolsPanel::GetActionsForType(wxChoice* targetChoice) {
+    if (targetChoice == m_objectOnClickChoice) {
+        return m_selectedObject->m_onClickActions;
+    } else if (targetChoice == m_objectOnHoverChoice) {
+        return m_selectedObject->m_onHoverActions;
+    } else { // targetChoice == m_objectOnUseItemChoice
+        return m_selectedObject->m_onUseItemActions;
+    }
+}
 
 
 void DrawToolsPanel::UpdateObjectDetailsVisibility() {

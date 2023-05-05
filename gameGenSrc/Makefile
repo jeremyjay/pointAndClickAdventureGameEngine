@@ -1,5 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -O2 `wx-config --cxxflags`
+# CXXFLAGS = -std=c++11 -Wall -g `wx-config --cxxflags`
 LDFLAGS = `wx-config --libs`
 
 TARGET = draw_squares_app

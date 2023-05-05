@@ -1,0 +1,9 @@
+*.o
+*.xml
+*.png
+*.json
+*.plist
+.DS_Store
+play
+draw_squares_app
+*.ttf

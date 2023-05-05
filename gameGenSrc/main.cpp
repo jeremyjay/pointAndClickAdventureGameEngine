@@ -19,6 +19,7 @@ private:
     void OnObjectsListSelected(wxCommandEvent &event);
     void OnObjectImageButtonClicked(wxCommandEvent& event);
     void setSelectedObject(int index);
+    void UpdateActionsList(wxChoice* choice, const std::vector<std::string>& actions);
 
 
     DrawObjectPanel *m_drawObjectPanel;
@@ -125,7 +126,7 @@ void MainFrame::setSelectedObject(int selectedIndex)
     m_drawToolsPanel->UpdateObjectDetailsVisibility();
         m_drawToolsPanel->m_objectsList->SetSelection(selectedIndex);
         InteractiveObject &selectedObject = m_drawObjectPanel->m_objects[selectedIndex];
-        // m_drawToolsPanel->m_selectedObject = &selectedObject;
+        m_drawToolsPanel->m_selectedObject = &selectedObject;
         m_drawToolsPanel->m_objectXText->SetValue(wxString::Format("%d", selectedObject.x));
         m_drawToolsPanel->m_objectYText->SetValue(wxString::Format("%d", selectedObject.y));
         m_drawToolsPanel->m_objectWidthText->SetValue(wxString::Format("%d", selectedObject.width));
@@ -149,9 +150,20 @@ void MainFrame::setSelectedObject(int selectedIndex)
         // Refresh the static bitmap to update the displayed image
         m_drawToolsPanel->m_objectImageButton->Refresh();
         // Update wxChoice controls with appropriate values
+        UpdateActionsList(m_drawToolsPanel->m_objectOnClickChoice, selectedObject.m_onClickActions);
+        UpdateActionsList(m_drawToolsPanel->m_objectOnHoverChoice, selectedObject.m_onHoverActions);
+        UpdateActionsList(m_drawToolsPanel->m_objectOnUseItemChoice, selectedObject.m_onUseItemActions);
+
         m_drawToolsPanel->m_objectOnClickChoice->SetSelection(0);
         m_drawToolsPanel->m_objectOnHoverChoice->SetSelection(0);
         m_drawToolsPanel->m_objectOnUseItemChoice->SetSelection(0);
+    }
+}
+
+void MainFrame::UpdateActionsList(wxChoice* choice, const std::vector<std::string>& actions) {
+    choice->Clear();
+    for (const std::string& action : actions) {
+        choice->Append(action);
     }
 }
 

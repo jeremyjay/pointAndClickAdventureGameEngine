@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include <functional>
-// #include "interactiveObject.h"
+#include "interactiveObject.h"
 
 class DrawToolsPanel : public wxPanel {
 public:
@@ -27,7 +27,7 @@ public:
     wxBoxSizer *onHoverSizer;
     wxBoxSizer *onUseItemSizer;
 
-    // InteractiveObject * m_selectedObject = nullptr;
+    InteractiveObject * m_selectedObject = nullptr;
 
 
 void ughTest(wxCommandEvent &event);
@@ -37,7 +37,7 @@ void UpdateObjectDetailsVisibility();
 void OnAddButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl);
 void OnDeleteButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl);
 
-// std::vector<std::string>& GetActionsForType(wxChoice* targetChoice);
+std::vector<std::string>& GetActionsForType(wxChoice* targetChoice);
 
 
     //maybe move to private
