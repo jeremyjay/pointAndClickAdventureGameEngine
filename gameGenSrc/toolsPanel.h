@@ -28,6 +28,9 @@ void ughTest(wxCommandEvent &event);
 void ugthest(wxCommandEvent &event);
 void UpdateObjectDetailsVisibility();
 
+void OnAddButtonClick(wxCommandEvent &event);
+void OnDeleteButtonClick(wxCommandEvent &event);
+
     //maybe move to private
     wxTextCtrl *m_objectXText;
     wxTextCtrl *m_objectYText;

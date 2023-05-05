@@ -179,8 +179,31 @@ void DrawObjectPanel::OnLeftUp(wxMouseEvent& event) {
     if (m_drawingObject) {
         m_endPoint = event.GetPosition();
 
+        if(m_endPoint.x < m_startPoint.x)
+        {
+            int temp = m_startPoint.x;
+            m_startPoint.x = m_endPoint.x;
+            m_endPoint.x = temp;
+        }
+
+        if(m_endPoint.y < m_startPoint.y)
+        {
+            int temp = m_startPoint.y;
+            m_startPoint.y = m_endPoint.y;
+            m_endPoint.y = temp;
+        }
+
         int width = m_endPoint.x - m_startPoint.x;
         int height = m_endPoint.y - m_startPoint.y;
+
+        // only draw objects that are larger than a minimum
+        // width and height
+        if(width < 10 || height < 10)
+        {
+            m_drawingObject = false;
+            Refresh();
+            return;
+        }
 
         InteractiveObject objeto(
             1,                           // ID
