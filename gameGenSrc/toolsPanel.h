@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include <functional>
+// #include "interactiveObject.h"
 
 class DrawToolsPanel : public wxPanel {
 public:
@@ -22,14 +23,22 @@ public:
     wxBoxSizer *objectDetailsSizer;
     wxBoxSizer *xyHorizontalSizer;
     wxBoxSizer *whHorizontalSizer;
+    wxBoxSizer *onClickSizer;
+    wxBoxSizer *onHoverSizer;
+    wxBoxSizer *onUseItemSizer;
+
+    // InteractiveObject * m_selectedObject = nullptr;
 
 
 void ughTest(wxCommandEvent &event);
 void ugthest(wxCommandEvent &event);
 void UpdateObjectDetailsVisibility();
 
-void OnAddButtonClick(wxCommandEvent &event);
-void OnDeleteButtonClick(wxCommandEvent &event);
+void OnAddButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl);
+void OnDeleteButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl);
+
+// std::vector<std::string>& GetActionsForType(wxChoice* targetChoice);
+
 
     //maybe move to private
     wxTextCtrl *m_objectXText;

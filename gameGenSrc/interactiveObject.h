@@ -1,5 +1,11 @@
+#ifndef INTERACTIVE_OBJECT_H_
+#define INTERACTIVE_OBJECT_H_
+
+
 #include <wx/wx.h>
 #include <functional>
+#include <vector>
+#include <string>
 
 class InteractiveObject : public wxRect
 {
@@ -33,6 +39,12 @@ public:
     void UseItem() { m_onUseItem(*this); }
 
 
+
+    std::vector<std::string> m_onClickActions;
+    std::vector<std::string> m_onHoverActions;
+    std::vector<std::string> m_onUseItemActions;
+
+
 private:
     int m_id;
     wxString m_imagePath;
@@ -42,3 +54,5 @@ private:
     CallbackFunction m_onHover;
     CallbackFunction m_onUseItem;
 };
+
+#endif

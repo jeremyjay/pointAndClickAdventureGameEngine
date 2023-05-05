@@ -77,7 +77,7 @@ wxBitmap scaledBitmap(scaledImage);
     objectDetailsSizer->Add(m_objectImageButton, 0, wxALL, 5);
 
     // OnClick Section
-    wxBoxSizer *onClickSizer = new wxBoxSizer(wxHORIZONTAL);;
+    onClickSizer = new wxBoxSizer(wxHORIZONTAL);;
     m_objectOnClickChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, {});
     m_objectOnClickChoice->Append("None");
     objectDetailsSizer->Add(new wxStaticText(this, wxID_ANY, "OnClick:"), 0, wxALL, 5);
@@ -90,7 +90,7 @@ wxBitmap scaledBitmap(scaledImage);
 
 
     // OnHover Section
-    wxBoxSizer *onHoverSizer = new wxBoxSizer(wxHORIZONTAL);;
+    onHoverSizer = new wxBoxSizer(wxHORIZONTAL);;
     m_objectOnHoverChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, {});
     m_objectOnHoverChoice->Append("None");
     objectDetailsSizer->Add(new wxStaticText(this, wxID_ANY, "OnHover:"), 0, wxALL, 5);
@@ -104,7 +104,7 @@ wxBitmap scaledBitmap(scaledImage);
 
 
     // OnUseItem Section
-    wxBoxSizer *onUseItemSizer = new wxBoxSizer(wxHORIZONTAL);;
+    onUseItemSizer = new wxBoxSizer(wxHORIZONTAL);;
     m_objectOnUseItemChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, {});
     m_objectOnUseItemChoice->Append("None");
     objectDetailsSizer->Add(new wxStaticText(this, wxID_ANY, "OnUseItem:"), 0, wxALL, 5);
@@ -114,9 +114,6 @@ wxBitmap scaledBitmap(scaledImage);
     wxButton *deleteButtonOnUseItem = new wxButton(this, ID_ON_USE_ITEM_DEL_BUTTON, "Delete", wxDefaultPosition, wxSize(50, 20), 0);
     onUseItemSizer->Add(deleteButtonOnUseItem, 0, wxALL, 5);
     objectDetailsSizer->Add(onUseItemSizer, 0, wxALL, 5);
-    // m_objectOnUseItemChoice = new wxChoice(this, wxID_ANY);
-    // objectDetailsSizer->Add(new wxStaticText(this, wxID_ANY, "OnUseItem:"), 0, wxALL, 5);
-    // objectDetailsSizer->Add(m_objectOnUseItemChoice, 0, wxALL, 5);
 
     UpdateObjectDetailsVisibility();
 
@@ -159,13 +156,37 @@ wxBitmap scaledBitmap(scaledImage);
         wxSingleChoiceDialog dialog(this, "Choose an action", "Add Action", choices);
         
         if (dialog.ShowModal() == wxID_OK) {
-            wxString selectedAction = dialog.GetStringSelection();
-            targetChoice->Append(selectedAction);
-            targetChoice->SetSelection(targetChoice->GetCount() - 1);
+          wxString selectedAction = dialog.GetStringSelection();
+
+          if (selectedAction == "playSound")
+          {
+            std::cout << "ehllo" << std::endl;
+              wxFileDialog openFileDialog(
+                  this, _("Open sound file"), "", "",
+                  "MP3 files (*.mp3)|*.mp3|WAV files (*.wav)|*.wav|All files (*.*)|*.*",
+                  wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+              if (openFileDialog.ShowModal() == wxID_CANCEL)
+                  return;
+
+              wxString filePath = openFileDialog.GetPath();
+              selectedAction = selectedAction + " - " + filePath;
+          }
+          else
+          {
+            std::cout << selectedAction << std::endl;
+          }
+
+          targetChoice->Append(selectedAction);
+          targetChoice->SetSelection(targetChoice->GetCount() - 1);
+
+          //update the selected object
+          // if(m_selectedObject)
+          //   GetActionsForType(targetChoice).push_back(selectedAction.ToStdString());
         }
     };
 
-    auto onClickDeleteButtonHandler = [this](wxCommandEvent& event, wxChoice* targetChoice) {
+    auto onClickDeleteButtonHandler = [](wxCommandEvent& event, wxChoice* targetChoice) {
         // Add logic for the Delete button here, using targetChoice to determine which wxChoice to update.
         int selectedIndex = targetChoice->GetSelection();
         
@@ -177,12 +198,6 @@ wxBitmap scaledBitmap(scaledImage);
 
     
     // OnClick add and subtract buttons
-    // Bind(wxEVT_BUTTON, &DrawToolsPanel::OnAddButtonClick, this, ID_ON_CLICK_ADD_BUTTON);
-    // Bind(wxEVT_BUTTON, &DrawToolsPanel::OnDeleteButtonClick, this, ID_ON_CLICK_DEL_BUTTON);
-
-
-    // addButtonOnClick->Bind(wxEVT_BUTTON, [onClickAddButtonHandler](wxCommandEvent& event){ onClickAddButtonHandler(event, m_objectOnClickChoice); });
-    // deleteButtonOnClick->Bind(wxEVT_BUTTON, [onClickDeleteButtonHandler](wxCommandEvent& event){ onClickDeleteButtonHandler(event, m_objectOnClickChoice); });
 
     addButtonOnClick->Bind(wxEVT_BUTTON, [this, onClickAddButtonHandler](wxCommandEvent& event) { onClickAddButtonHandler(event, m_objectOnClickChoice); });
     deleteButtonOnClick->Bind(wxEVT_BUTTON, [this, onClickDeleteButtonHandler](wxCommandEvent& event) { onClickDeleteButtonHandler(event, m_objectOnClickChoice); });
@@ -205,6 +220,17 @@ void DrawToolsPanel::ugthest(wxCommandEvent& event)
     OnObjectImageButtonClicked(event);
 }
 
+// std::vector<std::string>& DrawToolsPanel::GetActionsForType(wxChoice* targetChoice) {
+//     if (targetChoice == m_objectOnClickChoice) {
+//         return m_selectedObject->m_onClickActions;
+//     } else if (targetChoice == m_objectOnHoverChoice) {
+//         return m_selectedObject->m_onHoverActions;
+//     } else { // targetChoice == m_objectOnUseItemChoice
+//         return m_selectedObject->m_onUseItemActions;
+//     }
+// }
+
+
 void DrawToolsPanel::UpdateObjectDetailsVisibility() {
     bool showDetails = m_objectsList->GetSelection() != wxNOT_FOUND;
 
@@ -221,16 +247,23 @@ void DrawToolsPanel::UpdateObjectDetailsVisibility() {
     updateChildVisibility(xyHorizontalSizer);
     updateChildVisibility(whHorizontalSizer);
 
+    updateChildVisibility(onClickSizer);
+    updateChildVisibility(onHoverSizer);
+    updateChildVisibility(onUseItemSizer);
+
     Layout();
 }
 
 
-void DrawToolsPanel::OnAddButtonClick(wxCommandEvent &event) {
+
+void DrawToolsPanel::OnAddButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl)
+{
 
 }
 
 
-void DrawToolsPanel::OnDeleteButtonClick(wxCommandEvent &event) {
+
+void DrawToolsPanel::OnDeleteButtonClick(wxCommandEvent &event, wxChoice *choiceCtrl) {
 
 }
 

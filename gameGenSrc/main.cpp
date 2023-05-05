@@ -125,6 +125,7 @@ void MainFrame::setSelectedObject(int selectedIndex)
     m_drawToolsPanel->UpdateObjectDetailsVisibility();
         m_drawToolsPanel->m_objectsList->SetSelection(selectedIndex);
         InteractiveObject &selectedObject = m_drawObjectPanel->m_objects[selectedIndex];
+        // m_drawToolsPanel->m_selectedObject = &selectedObject;
         m_drawToolsPanel->m_objectXText->SetValue(wxString::Format("%d", selectedObject.x));
         m_drawToolsPanel->m_objectYText->SetValue(wxString::Format("%d", selectedObject.y));
         m_drawToolsPanel->m_objectWidthText->SetValue(wxString::Format("%d", selectedObject.width));
@@ -135,8 +136,6 @@ void MainFrame::setSelectedObject(int selectedIndex)
         std::cout << "width: " << selectedObject.width << std::endl;
         std::cout << "height: " << selectedObject.height << std::endl;
         std::cout << "cursorPath: " << selectedObject.GetCursorPath() << std::endl;
-
-
 
         // Load a new image based on the selected index, for example
         wxString imagePath = selectedObject.GetCursorPath();
@@ -150,9 +149,9 @@ void MainFrame::setSelectedObject(int selectedIndex)
         // Refresh the static bitmap to update the displayed image
         m_drawToolsPanel->m_objectImageButton->Refresh();
         // Update wxChoice controls with appropriate values
-        // m_objectOnClickChoice->SetSelection(...);
-        // m_objectOnHoverChoice->SetSelection(...);
-        // m_objectOnUseItemChoice->SetSelection(...);
+        m_drawToolsPanel->m_objectOnClickChoice->SetSelection(0);
+        m_drawToolsPanel->m_objectOnHoverChoice->SetSelection(0);
+        m_drawToolsPanel->m_objectOnUseItemChoice->SetSelection(0);
     }
 }
 
